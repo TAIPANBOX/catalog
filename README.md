@@ -33,7 +33,7 @@ Every template here is defensive by design: it exists to help an operator govern
 | [`wardryx-policies/`](wardryx-policies/) | Policy-as-code documents for [Wardryx](https://github.com/TAIPANBOX/wardryx), the stack's policy decision point | `wardryx serve -policy <dir>` |
 | [`mockryx-drills/`](mockryx-drills/) | Fire-drill scenarios for [Mockryx](https://github.com/TAIPANBOX/mockryx), the stack's pre-production guardrail rehearsal harness | `mockryx run --gateway <url> <dir>` |
 | [`passport-templates/`](passport-templates/) | [Agent Passport](https://github.com/TAIPANBOX/agent-passport) identity documents for common agent runtimes (LangGraph, CrewAI, AutoGen) | copy, fill in, validate against the published schema |
-| [`terraform-modules/`](terraform-modules/) | Starting-point `.tf` files for [terraform-provider-taipan](https://github.com/TAIPANBOX/terraform-provider-taipan) | build the provider + `terraform plan` (dev_overrides; the provider is not on the Registry yet, see the module README) |
+| [`terraform-modules/`](terraform-modules/) | Starting-point `.tf` files for [terraform-provider-taipan](https://github.com/TAIPANBOX/terraform-provider-taipan) | `terraform init` + `terraform plan` (published on the Registry as [`TAIPANBOX/taipan`](https://registry.terraform.io/providers/TAIPANBOX/taipan)) |
 
 Every file in every directory is heavily commented in its own comment syntax, explaining what to change and why, with realistic-but-clearly-placeholder values (`agent://YOUR-ORG.example/...`, `owner: team-x@YOUR-ORG.example`, and so on). **These are starting points to adapt, not finished policy** - read the comments, replace every placeholder, and test against your own infrastructure before relying on any of it.
 
