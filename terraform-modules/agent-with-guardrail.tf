@@ -2,10 +2,10 @@
 #
 # TEMPLATE - a starting point, not a finished module. Copy this file and
 # variables.tf together, fill in your own values (a terraform.tfvars file is
-# the usual place), then run `terraform plan`. The taipan provider is not on
-# the Terraform Registry yet (see the required_providers note below and
-# terraform-modules/README.md), so build it from source and use a
-# dev_overrides block rather than a plain `terraform init`.
+# the usual place), then run `terraform init` and `terraform plan`. The taipan
+# provider is published on the Terraform Registry (TAIPANBOX/taipan), so a
+# plain `terraform init` resolves it from the required_providers block below;
+# terraform-modules/README.md also covers the from-source dev_overrides path.
 #
 # WHAT THIS DECLARES
 # One agent, as code, two resources:
@@ -45,13 +45,12 @@
 terraform {
   required_providers {
     taipan = {
-      source = "TAIPANBOX/taipan"
-      # The provider is not published to the Terraform Registry yet (no
-      # tagged release), so this source and a version constraint will not
-      # resolve with a plain `terraform init`. Build the provider from source
-      # and add a dev_overrides block in ~/.terraformrc (see the provider's
-      # Install section); dev_overrides bypasses version resolution entirely.
-      # Once a release is tagged, add back a constraint like `version = "~> 0.1"`.
+      source  = "TAIPANBOX/taipan"
+      version = "~> 0.1"
+      # Published on the Terraform Registry (v0.1.0), so a plain
+      # `terraform init` resolves this source and version constraint. For
+      # provider development, a dev_overrides block in ~/.terraformrc (see the
+      # provider's Install section) bypasses init and version resolution.
     }
   }
 }
