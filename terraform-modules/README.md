@@ -8,7 +8,7 @@
 
 1. Copy both files into your Terraform configuration.
 2. Fill in `variables.tf`'s values - a `terraform.tfvars` file (gitignored, or injected by your CI) is the usual place for the real ones, especially `wardryx_admin_key`.
-3. `terraform init` (pulls the `TAIPANBOX/taipan` provider from the registry), then `terraform plan` to review before `terraform apply`.
+3. The `TAIPANBOX/taipan` provider is not yet published to the Terraform Registry (no tagged release yet), so a plain `terraform init` will not resolve it. Until the first release, build the provider from source and point Terraform at that local build with a `dev_overrides` block in `~/.terraformrc`, following the provider's own [Install](https://github.com/TAIPANBOX/terraform-provider-taipan#install) section. With `dev_overrides` active, `terraform init` is skipped for this provider and `terraform plan`/`apply` use the local build directly; review the plan before `terraform apply`.
 4. `taipan_wardryx_policy` needs an admin-role Wardryx key; `taipan_agent_passport` calls no API at all and works even with no Wardryx configured.
 
 This catalog does not run, host, or manage any Terraform state on your behalf - these files only help you write a correct configuration faster, against infrastructure you provision and operate yourself.
