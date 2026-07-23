@@ -71,6 +71,43 @@ variable "labels" {
   description = "Optional free-form labels on the passport, e.g. { env = \"prod\", cost_center = \"cs-eu\" }."
 }
 
+# --- declared scope: what this agent is meant to touch ----------------------
+# Both are declarations of intent carried on the passport for audit and
+# inventory (agent-passport SPEC.md Sec 4.4-4.5), NOT controls this stack
+# enforces at runtime. Leave either at its empty default to omit it from the
+# rendered passport entirely.
+
+variable "filesystem" {
+  type = list(object({
+    path = string
+    mode = string
+  }))
+  default     = []
+  description = "Optional folder scopes this agent is declared to access, e.g. [{ path = \"/data/reports\", mode = \"read\" }, { path = \"/data/out\", mode = \"write\" }]. Each entry needs a non-empty path and a mode of exactly \"read\" or \"write\" (agent-passport SPEC.md Sec 4.4)."
+  validation {
+    condition     = alltrue([for f in var.filesystem : trimspace(f.path) != ""])
+    error_message = "Every filesystem entry needs a non-empty path."
+  }
+  validation {
+    condition     = alltrue([for f in var.filesystem : contains(["read", "write"], f.mode)])
+    error_message = "Every filesystem entry's mode must be exactly \"read\" or \"write\" (agent-passport SPEC.md Sec 4.4)."
+  }
+}
+
+variable "models" {
+  type = list(object({
+    provider = string
+    model    = optional(string)
+    endpoint = optional(string)
+  }))
+  default     = []
+  description = "Optional LLM providers/models/endpoints this agent is declared to use, e.g. [{ provider = \"anthropic\", model = \"claude-sonnet-4-5\", endpoint = \"api.anthropic.com\" }, { provider = \"openai\" }]. Only provider is required; model pins a specific model and endpoint names the API host, both optional (agent-passport SPEC.md Sec 4.5)."
+  validation {
+    condition     = alltrue([for m in var.models : trimspace(m.provider) != ""])
+    error_message = "Every models entry needs a non-empty provider (agent-passport SPEC.md Sec 4.5); model and endpoint are optional."
+  }
+}
+
 # --- guardrail: the Wardryx policy layered on top of this agent -------------
 
 variable "policy_target_glob" {

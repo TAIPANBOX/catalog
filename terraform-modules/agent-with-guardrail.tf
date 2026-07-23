@@ -18,21 +18,26 @@
 # (see that repo, or wardryx-policies/ and passport-templates/ in this
 # catalog for the underlying document formats each resource renders).
 #
-# A KNOWN GAP WORTH KNOWING ABOUT
+# FILESYSTEM AND MODELS: DECLARED, NOT ENFORCED
 # The Genaryx onboard wizard's generated Terraform snippet
 # (genaryx/crates/api/src/onboard/commands.rs) emits filesystem {} and
-# models {} blocks inside taipan_agent_passport, mirroring the newer
-# filesystem/models fields the Agent Passport JSON schema itself now
-# supports (agent-passport SPEC.md Sec 4.4-4.5). As of this catalog's
-# writing, terraform-provider-taipan's actual taipan_agent_passport
-# resource schema does NOT yet define those two attributes - only id,
-# owner, display_name, runtime, parent, attestation_method,
-# attestation_detail, labels, and output_path exist on the resource. If you
-# need filesystem/models declared, put them directly on a hand-written
-# passport JSON (see passport-templates/ in this catalog) for now, rather
-# than in this Terraform resource; `terraform validate`/`apply` would
-# reject a filesystem {} or models {} block here until the provider catches
-# up (this file deliberately omits them so it applies cleanly today).
+# models {} blocks inside taipan_agent_passport, mirroring the
+# filesystem/models fields the Agent Passport JSON schema supports
+# (agent-passport SPEC.md Sec 4.4-4.5). terraform-provider-taipan's
+# taipan_agent_passport resource now defines both, as repeatable nested
+# blocks that render to the passport document's root-level filesystem/models
+# arrays (added in provider PR #1, merged 2026-07-23). This module exposes
+# them through the optional var.filesystem and var.models inputs, rendered as
+# the dynamic "filesystem"/"models" blocks in the resource below. Both
+# default to empty: leave them unset and the rendered passport is
+# byte-for-byte what it was before these blocks existed.
+#
+# Note what these two declare vs. what they do: filesystem/models are
+# declarations of intent carried on the passport for audit and inventory, not
+# controls this stack enforces at runtime - nothing grants, mounts, or
+# restricts access based on them. What is actually enforced lives in the
+# taipan_wardryx_policy resource below (tools, spend, steps, attestation).
+# See passport-templates/README.md for the same distinction on the JSON side.
 
 terraform {
   required_providers {
@@ -75,6 +80,26 @@ resource "taipan_agent_passport" "this" {
   attestation_detail = var.attestation_detail
 
   labels = var.labels
+
+  # Optional declared folder scopes and LLM providers/models, rendered to the
+  # passport document's root-level filesystem/models arrays. Both stay out of
+  # the document entirely when their variable is left at its empty default.
+  dynamic "filesystem" {
+    for_each = var.filesystem
+    content {
+      path = filesystem.value.path
+      mode = filesystem.value.mode
+    }
+  }
+
+  dynamic "models" {
+    for_each = var.models
+    content {
+      provider = models.value.provider
+      model    = models.value.model
+      endpoint = models.value.endpoint
+    }
+  }
 
   # CHANGE ME (or remove): writes the rendered passport JSON to disk, e.g.
   # for Idryx/Qryx to read directly. Drop this attribute if you only want
