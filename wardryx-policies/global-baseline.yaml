@@ -1,0 +1,49 @@
+# global-baseline.yaml
+#
+# TEMPLATE - starting point, not a finished policy. Copy this file, edit the
+# placeholder values below, then load it into your own Wardryx instance:
+#
+#   wardryx serve -policy ./policies
+#
+# WHAT THIS POLICY DOES
+# A sane org-wide floor, meant to sit underneath the more specific,
+# team-scoped policies in this directory (finance-guardrail.yaml,
+# hr-guardrail.yaml, and so on), not replace them. Wardryx matches every
+# policy whose target glob matches a given agent id, so a request from
+# agent://YOUR-ORG.example/finance/wire-bot can match both this file's
+# agent://* rule AND finance-guardrail.yaml's more specific rule at once;
+# any deny from either one wins outright.
+#
+# This file is also a demonstration of a feature worth knowing: a single
+# policy file may hold either ONE policy document, or a YAML LIST of
+# several. Wardryx's loader (internal/policy.decode) tries a list first and
+# falls back to a single document, so both forms are valid input. This file
+# uses the list form to define two layered rules in one place.
+#
+# FIELD REFERENCE (see wardryx/internal/policy for the authoritative source)
+#   max_steps            Caps a run's step count. A generous, org-wide
+#                         ceiling here is a cheap backstop against any agent,
+#                         anywhere, looping forever with no other policy in
+#                         place to catch it.
+#   deny_if_unattested    Refuses any request from an agent with no live
+#                         attestation. Applied narrowly here, only to a
+#                         "privileged" path segment your org defines, since
+#                         requiring attestation from literally every agent
+#                         org-wide (agent://*) is a heavier lift to roll out
+#                         than most operators want as day-one policy.
+
+# CHANGE ME: replace every YOUR-ORG.example below with your real trust
+# domain, and "privileged" with whatever path convention you use to mark
+# agents that hold real access (production data, payments, infra).
+- name: global-step-ceiling
+  target: "agent://*"
+  # A generous backstop, not a tight one: individual guardrails above should
+  # set their own tighter max_steps where it matters. This just guarantees
+  # no agent, anywhere in the org, ever runs unbounded.
+  max_steps: 500
+
+- name: privileged-attestation-floor
+  target: "agent://YOUR-ORG.example/privileged/*"
+  # Anything your org labels "privileged" (by agent id path convention) must
+  # carry a live attestation before Wardryx lets it act at all.
+  deny_if_unattested: true

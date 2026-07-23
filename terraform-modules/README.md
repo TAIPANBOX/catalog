@@ -1,0 +1,14 @@
+# Terraform templates for the taipan provider
+
+[terraform-provider-taipan](https://github.com/TAIPANBOX/terraform-provider-taipan) manages agent identity and Wardryx policy as code: `taipan_agent_passport` renders and validates an Agent Passport document, `taipan_wardryx_policy` pushes a guardrail live to a Wardryx instance via its policy-as-code API. The files here are a starting-point pair, not a published, versioned module - copy them into your own configuration and fill in the variables.
+
+`agent-with-guardrail.tf` declares one agent's passport and its matching Wardryx policy together, since in practice you almost always want both for a new agent at once. `variables.tf` holds the inputs it needs (`trust_domain`, `agent_path`, `owner`, attestation fields, guardrail thresholds, and the provider connection). The resource attribute names mirror the provider's real schema, not a guess - see each file's own comments for where that was checked, including one real gap worth reading before you rely on it: the provider does not yet support the `filesystem`/`models` blocks that Genaryx's onboard wizard emits for a passport, even though the JSON passport format itself already supports both.
+
+## How to use these
+
+1. Copy both files into your Terraform configuration.
+2. Fill in `variables.tf`'s values - a `terraform.tfvars` file (gitignored, or injected by your CI) is the usual place for the real ones, especially `wardryx_admin_key`.
+3. `terraform init` (pulls the `TAIPANBOX/taipan` provider from the registry), then `terraform plan` to review before `terraform apply`.
+4. `taipan_wardryx_policy` needs an admin-role Wardryx key; `taipan_agent_passport` calls no API at all and works even with no Wardryx configured.
+
+This catalog does not run, host, or manage any Terraform state on your behalf - these files only help you write a correct configuration faster, against infrastructure you provision and operate yourself.

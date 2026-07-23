@@ -1,0 +1,64 @@
+# budget-runaway-drill.yaml
+#
+# TEMPLATE - starting point, not a finished drill. Copy this file, edit the
+# placeholder values below, then run it against a gateway YOU operate:
+#
+#   mockryx run --gateway http://127.0.0.1:8080 ./drills
+#
+# DEFENSIVE INTENT
+# This scenario is a fire drill, not an attack. It sends a burst of cheap,
+# repeated requests carrying a deliberately tiny budget at your OWN
+# pre-production gateway (point it at a sandbox in front of a fake/echo
+# model provider, never a live one). It rehearses the "agent stuck in a
+# loop, burning spend" failure mode, so you find out whether your own
+# budget breaker actually cuts the loop off, on your own schedule, instead
+# of finding out during a real incident. mockryx never calls a real model
+# provider and never targets anything other than the --gateway URL you pass
+# on the command line yourself.
+#
+# WHY THIS ONE HAS NO "requires:"
+# A budget breaker is expected to be a core, always-on gateway feature (not
+# an optional add-on like Wardryx policy or DLP), so this scenario omits
+# `requires`. If your gateway doesn't have one wired in, a miss here is a
+# genuine gap worth knowing about, not a "feature not configured" skip.
+#
+# SCENARIO SCHEMA (see mockryx/internal/scenario for the authoritative
+# source): name and steps are required; each step needs request.model,
+# request.messages (at least one), and expect.status.
+
+name: budget-runaway-drill
+description: >
+  A support agent is handed a near-zero budget and told to keep working.
+  The budget guardrail should cut it off well before the loop can run away,
+  answering with HTTP 402 on one of the early repeats.
+
+steps:
+  - name: loop-until-budget-cuts-it-off
+    # CHANGE ME: how many times to resend this request before giving up.
+    # Keep it small - this is meant to trip quickly, not soak the gateway.
+    repeat: 6
+    request:
+      # CHANGE ME: pick a cheap model - this drill is about the budget
+      # guardrail firing, not about what the (fake/echo) model returns.
+      model: claude-haiku
+      max_tokens: 50
+      messages:
+        - role: user
+          content: "mockryx fire drill: keep retrying until stopped"
+    headers:
+      run_id: mockryx-budget-runaway-drill
+      # CHANGE ME: use an agent id under your own trust domain, ideally one
+      # your own policies already recognize as a rehearsal/test identity.
+      agent_id: "agent://YOUR-ORG.example/rehearsal/support-bot"
+      on_behalf_of: "user://YOUR-ORG.example/rehearsal-operator"
+      # CHANGE ME: deliberately tiny, on purpose - small enough that even a
+      # single successful call should exhaust it. Push this value down
+      # further if your gateway's cheapest real rate is lower than assumed.
+      budget_usd: "0.001"
+      task_type: support_chat
+    expect:
+      # 402 Payment Required is the budget breaker's documented response.
+      status: 402
+      # CHANGE ME: how many repeats you're willing to tolerate before the
+      # breaker must have fired. Lower this once you trust your setup.
+      within_repeats: 6

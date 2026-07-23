@@ -1,0 +1,26 @@
+{
+  "//": [
+    "TEMPLATE - a starting point, not a finished passport. Replace every placeholder value below before treating this as real.",
+    "Required fields: schema (leave as-is), id, owner (agent-passport SPEC.md Sec 4.1). Everything else is optional.",
+    "attestation.method is \"none\" here on purpose: it is the honest default for an agent with no verified workload identity yet, not a placeholder to silently ship as-is. Idryx is meant to surface \"attestation: none\" on privileged agents as a finding - upgrade this to oidc / spiffe-svid / enclave-key / mtls-cert once you actually have one wired up.",
+    "No filesystem block here, to show it really is optional - add one (see langgraph-agent.json for the shape) if this agent's owner wants declared folder scopes on record.",
+    "Remove every \"//\" key before using this file for real."
+  ],
+  "schema": "taipanbox.dev/agent-passport/v0.1",
+  "id": "agent://your-org.example/ops/autogen-remediation-bot",
+  "owner": "team-ops@YOUR-ORG.example",
+  "display_name": "CHANGE ME: e.g. Incident remediation bot (AutoGen)",
+  "runtime": "autogen",
+  "parent": "agent://your-org.example/ops/on-call-orchestrator",
+  "attestation": {
+    "method": "none"
+  },
+  "models": [
+    { "//": "AutoGen's multi-agent conversations commonly mix providers across roles - this one is a Bedrock-hosted Claude", "provider": "bedrock", "model": "anthropic.claude-sonnet-4-5", "endpoint": "bedrock-runtime.us-east-1.amazonaws.com" }
+  ],
+  "labels": {
+    "env": "prod",
+    "cost_center": "CHANGE-ME"
+  },
+  "created_at": "2026-07-23T00:00:00Z"
+}

@@ -1,0 +1,30 @@
+{
+  "//": [
+    "TEMPLATE - a starting point, not a finished passport. Replace every placeholder value below before treating this as real.",
+    "Required fields: schema (leave as-is), id, owner (agent-passport SPEC.md Sec 4.1). Everything else is optional - delete what this agent doesn't need.",
+    "This one shows a leaner shape than langgraph-agent.json: no parent (this crew isn't spawned by another agent), oidc attestation instead of spiffe-svid, and a models array with an unpinned provider-only entry (SPEC.md Sec 4.5's second example form).",
+    "id's trust domain and path must stay lowercase (SPEC.md Sec 3.1) even though other placeholder fields here follow the brief's UPPER-CASE-ME convention.",
+    "Remove every \"//\" key before using this file for real."
+  ],
+  "schema": "taipanbox.dev/agent-passport/v0.1",
+  "id": "agent://your-org.example/research/crewai-analyst-crew",
+  "owner": "team-research@YOUR-ORG.example",
+  "display_name": "CHANGE ME: e.g. Market research crew (CrewAI)",
+  "runtime": "crewai",
+  "attestation": {
+    "//": "oidc shown here as an alternative to spiffe-svid - detail is the issuer URL your workload identity token comes from.",
+    "method": "oidc",
+    "detail": "https://idp.YOUR-ORG.example/oidc"
+  },
+  "filesystem": [
+    { "//": "CrewAI agents commonly need only read access to a shared knowledge base", "path": "/data/knowledge-base", "mode": "read" }
+  ],
+  "models": [
+    { "//": "fully pinned: this crew's primary reasoning model", "provider": "anthropic", "model": "claude-sonnet-4-5" },
+    { "//": "provider declared, model left unpinned - legal per SPEC.md Sec 4.5, e.g. a crew member that calls whatever model its own CrewAI LLM config resolves to at runtime", "provider": "openai" }
+  ],
+  "labels": {
+    "env": "staging",
+    "team": "research"
+  }
+}

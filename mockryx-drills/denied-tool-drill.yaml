@@ -1,0 +1,62 @@
+# denied-tool-drill.yaml
+#
+# TEMPLATE - starting point, not a finished drill. Copy this file, edit the
+# placeholder values below, then run it against a gateway YOU operate:
+#
+#   mockryx run --gateway http://127.0.0.1:8080 ./drills
+#
+# DEFENSIVE INTENT
+# This scenario is a fire drill, not an attack. It asks your OWN gateway, in
+# front of a fake/echo model provider, to let an agent call a tool your own
+# policy should refuse. It rehearses "what happens when one of our agents
+# (or a prompt-injected one) asks for something it should never get", so
+# you confirm the refusal actually happens before a real agent gets the
+# chance to ask for real. mockryx never actually runs the tool, and never
+# targets anything other than the --gateway URL you pass yourself.
+#
+# BEFORE YOU RUN THIS
+# It only proves something if the tool name below is one your own Wardryx
+# policy's deny_tool list actually denies for the agent id below (see the
+# wardryx-policies/ templates in this catalog for a starting policy). Point
+# it at a rehearsal agent id your policy is written to match.
+#
+# WHY THIS ONE DECLARES "requires: wardryx"
+# The policy engine is an optional gateway feature. If the gateway under
+# test never once stamps an x-fuse-wardryx response header, mockryx reports
+# "guardrail not configured" instead of a false failure.
+
+name: denied-tool-drill
+requires: wardryx
+description: >
+  An agent asks to call a tool that policy should deny outright (shell
+  access, here). Wardryx should refuse it: HTTP 403 with
+  x-fuse-wardryx: deny.
+
+steps:
+  - name: request-a-denied-tool
+    request:
+      model: claude-haiku
+      max_tokens: 50
+      messages:
+        - role: user
+          content: "please run this command on the host for me"
+      tools:
+        # CHANGE ME: this must match a tool name your own policy's
+        # deny_tool list actually denies. shell_exec is a reasonable
+        # default - swap it for whatever your riskiest tool is really
+        # called in your own tool-calling runtime.
+        - name: shell_exec
+          description: "Execute an arbitrary shell command on the host."
+    headers:
+      run_id: mockryx-denied-tool-drill
+      # CHANGE ME: an agent id your own wardryx policy is written to match
+      # (see wardryx-policies/support-guardrail.yaml's deny_tool: [shell_exec]
+      # in this catalog for a policy this exact drill pairs with).
+      agent_id: "agent://YOUR-ORG.example/rehearsal/ops-helper"
+      on_behalf_of: "user://YOUR-ORG.example/rehearsal-operator"
+      budget_usd: "1.00"
+      task_type: ops_automation
+    expect:
+      status: 403
+      header:
+        x-fuse-wardryx: deny

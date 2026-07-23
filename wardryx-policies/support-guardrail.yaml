@@ -1,0 +1,37 @@
+# support-guardrail.yaml
+#
+# TEMPLATE - starting point, not a finished policy. Copy this file, edit the
+# placeholder values below, then load it into your own Wardryx instance:
+#
+#   wardryx serve -policy ./policies
+#
+# WHAT THIS POLICY DOES
+# A tier-1 support bot needs to be useful without a human approving every
+# step, so this template stays permissive-but-bounded: no cost threshold, no
+# attestation requirement, just a small deny list for the one tool a support
+# agent should never touch (a shell) and a hard cap on how many steps a
+# single run may take, so a stuck or looping agent cannot run forever.
+#
+# FIELD REFERENCE (see wardryx/internal/policy for the authoritative source)
+#   deny_tool   Tool names this policy refuses outright.
+#   max_steps   Caps a run's accumulated step count. Once the run's declared
+#               Steps reaches or exceeds this number, Wardryx denies. This
+#               is enforced against the step count the enforcement point
+#               (e.g. the gateway) supplies on every /v1/decide call.
+
+name: support-baseline
+
+# CHANGE ME: replace YOUR-ORG.example and "support" with your real trust
+# domain and agent path segment.
+target: "agent://YOUR-ORG.example/support/*"
+
+# CHANGE ME: the one thing a support bot should never be able to do is drop
+# into a shell. Add more tool names here as you find others that don't
+# belong in a support agent's hands.
+deny_tool:
+  - shell_exec
+
+# CHANGE ME: pick a number generous enough for a real support conversation
+# (including tool calls) to complete, but low enough that a looping or
+# confused agent gets cut off well before it burns meaningful spend or time.
+max_steps: 20

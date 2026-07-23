@@ -1,0 +1,64 @@
+# finance-guardrail.yaml
+#
+# TEMPLATE - starting point, not a finished policy. Copy this file, edit the
+# placeholder values below, then load it into your own Wardryx instance:
+#
+#   wardryx serve -policy ./policies
+#
+# (or point -policy / WARDRYX_POLICY at a directory containing this file
+# alongside your other policies; Wardryx loads every *.yaml, *.yml, and
+# *.json file in that directory, non-recursively, in sorted order).
+#
+# WHAT THIS POLICY DOES
+# A finance-team agent's actions are some of the costliest and most
+# irreversible an operator's stack can take. This template denies the two
+# highest-risk finance tools outright, sets an approvable band for spend
+# between a human-review threshold and a hard ceiling, and refuses to run
+# unattested (no verified workload identity).
+#
+# FIELD REFERENCE (see wardryx/internal/policy for the authoritative source)
+#   name                      Free text, used in Reason strings and logs.
+#   target                    An agent:// glob. "*" matches any run of
+#                             characters (including "/"); "?" matches
+#                             exactly one character.
+#   deny_tool                 Tool names this policy refuses outright, no
+#                             matter the spend or attestation state.
+#   require_human_above_usd   Above this estimated cost, Wardryx returns a
+#                             "hold": the call needs a signed approval_token
+#                             from a human before it can proceed.
+#   deny_above_usd            A hard ceiling. Above this estimated cost,
+#                             Wardryx denies outright - no approval_token,
+#                             however validly minted, can turn that deny
+#                             into an allow. Setting both fields gives you
+#                             an approvable band between them, and a line no
+#                             human sign-off is trusted to cross at all.
+#   deny_if_unattested        Refuses any request from an agent with no live
+#                             attestation (attestation method "" or "none"
+#                             on its Agent Passport / request).
+
+name: finance-guardrail
+
+# CHANGE ME: replace YOUR-ORG.example with your real trust domain, and
+# "finance" with the actual path segment your finance agents run under.
+# This glob matches every agent whose id starts with agent://YOUR-ORG.example/finance/
+target: "agent://YOUR-ORG.example/finance/*"
+
+# CHANGE ME: this starter list covers the two clearest "an agent should
+# never do this unattended" finance actions. Add your own tool names -
+# whatever your finance agents' tool-calling runtime actually exposes.
+deny_tool:
+  - send_wire_transfer
+  - delete_account
+
+# CHANGE ME: tune both numbers to your own risk tolerance and currency.
+# Below require_human_above_usd: allowed automatically.
+# Between the two: held for a human to approve (see wardryx's stateless
+# approval flow, POST /v1/approvals/{id}/decide).
+# Above deny_above_usd: denied outright, no approval possible.
+require_human_above_usd: 500
+deny_above_usd: 5000
+
+# CHANGE ME: keep this true unless every finance agent is guaranteed to
+# carry a real attestation (spiffe-svid, oidc, enclave-key, mtls-cert).
+# true is the safer default for a high-risk target glob like this one.
+deny_if_unattested: true

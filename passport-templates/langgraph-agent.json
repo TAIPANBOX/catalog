@@ -1,0 +1,32 @@
+{
+  "//": [
+    "TEMPLATE - a starting point, not a finished passport. Replace every placeholder value below before treating this as real.",
+    "Required fields per agent-passport SPEC.md Sec 4.1: schema (leave exactly as-is), id, owner. Everything else here is optional - delete what you don't need.",
+    "id must match agent://<lowercase-trust-domain>/<path>, e.g. agent://acme-bank.example/support/tier1-bot (SPEC.md Sec 3.1). The trust domain and path segments are validated lowercase-only - keep them lowercase even if the rest of your org's naming uses mixed case.",
+    "filesystem and models are DECLARATIONS OF INTENT for audit and inventory, not enforced controls - nothing in the stack grants or restricts access based on them today. See passport-templates/README.md in this catalog.",
+    "Remove every \"//\" key like this one before using this file as a real Agent Passport - they exist only to guide you while editing the template."
+  ],
+  "schema": "taipanbox.dev/agent-passport/v0.1",
+  "id": "agent://your-org.example/support/langgraph-triage-bot",
+  "owner": "team-support@YOUR-ORG.example",
+  "display_name": "CHANGE ME: e.g. Tier-1 support triage bot (LangGraph)",
+  "runtime": "langgraph",
+  "parent": "agent://your-org.example/support/orchestrator",
+  "attestation": {
+    "//": "method is one of: none, oidc, spiffe-svid, enclave-key, mtls-cert. spiffe-svid is shown here since LangGraph agents are commonly run behind a SPIRE-issued workload identity - use \"none\" instead if you don't have real attestation wired up yet. \"none\" is honest and legal; Idryx is meant to surface that gap as a finding, not have you fake a method to hide it.",
+    "method": "spiffe-svid",
+    "detail": "spiffe://your-org.example/agent/support/langgraph-triage-bot"
+  },
+  "filesystem": [
+    { "//": "read-only input this graph consumes", "path": "/data/reports", "mode": "read" },
+    { "//": "where this agent writes its own output", "path": "/data/out", "mode": "write" }
+  ],
+  "models": [
+    { "//": "pin the exact model this graph's LLM node calls, so an auditor can compare declared vs. observed use", "provider": "anthropic", "model": "claude-sonnet-4-5", "endpoint": "api.anthropic.com" }
+  ],
+  "labels": {
+    "env": "prod",
+    "cost_center": "CHANGE-ME"
+  },
+  "created_at": "2026-07-23T00:00:00Z"
+}

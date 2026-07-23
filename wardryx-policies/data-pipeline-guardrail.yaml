@@ -1,0 +1,40 @@
+# data-pipeline-guardrail.yaml
+#
+# TEMPLATE - starting point, not a finished policy. Copy this file, edit the
+# placeholder values below, then load it into your own Wardryx instance:
+#
+#   wardryx serve -policy ./policies
+#
+# WHAT THIS POLICY DOES
+# A data-pipeline agent (ETL, warehouse maintenance, cleanup jobs) can do
+# real damage with one bad tool call: a dropped table or an emptied bucket
+# does not roll back. This template denies the destructive-by-design tools
+# outright and caps how many steps one run may take, so a malformed job or
+# a runaway loop cannot compound the damage.
+#
+# FIELD REFERENCE (see wardryx/internal/policy for the authoritative source)
+#   deny_tool   Tool names this policy refuses outright, independent of
+#               spend or step count.
+#   max_steps   Caps a run's accumulated step count; once reached, Wardryx
+#               denies further steps in that run.
+
+name: data-pipeline-guardrail
+
+# CHANGE ME: replace YOUR-ORG.example and "data" with your real trust domain
+# and agent path segment.
+target: "agent://YOUR-ORG.example/data/*"
+
+# CHANGE ME: starter list of irreversible, whole-object data operations.
+# Add your own tool names - match them to whatever your pipeline runtime's
+# tool-calling surface actually exposes (a specific warehouse's DDL tools,
+# your object-storage client's delete/purge calls, and so on).
+deny_tool:
+  - drop_table
+  - truncate_table
+  - delete_bucket
+  - rm_recursive
+
+# CHANGE ME: set this to comfortably cover your longest legitimate pipeline
+# run, but low enough that a stuck job fails fast instead of quietly
+# re-running the same destructive step in a loop.
+max_steps: 50

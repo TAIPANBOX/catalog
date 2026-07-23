@@ -1,0 +1,51 @@
+# hr-guardrail.yaml
+#
+# TEMPLATE - starting point, not a finished policy. Copy this file, edit the
+# placeholder values below, then load it into your own Wardryx instance:
+#
+#   wardryx serve -policy ./policies
+#
+# WHAT THIS POLICY DOES
+# HR agents routinely sit next to PII: employee records, compensation,
+# medical/leave data. This template denies the two clearest PII-exfiltration
+# tools outright and restricts network egress to your actual HR SaaS
+# domains, so a compromised or misconfigured agent cannot quietly reach
+# somewhere else.
+#
+# FIELD REFERENCE (see wardryx/internal/policy for the authoritative source)
+#   deny_tool       Tool names this policy refuses outright.
+#   allow_domains   Network destinations a matched agent's DECLARED tools
+#                   may reach. This only restricts domains the caller's
+#                   request actually declares up front (e.g. from its tool
+#                   or MCP server manifests) - it is not a runtime egress
+#                   firewall. An agent whose request declares no domains at
+#                   all is not restricted by this field. Actually stopping a
+#                   tool from reaching an undeclared domain at runtime is an
+#                   enforcement point's job (an MCP gateway, a proxy), not
+#                   Wardryx's - Wardryx only governs what gets declared.
+#   deny_if_unattested   Refuses any request with no live attestation.
+
+name: hr-guardrail
+
+# CHANGE ME: replace YOUR-ORG.example and "hr" with your real trust domain
+# and agent path segment.
+target: "agent://YOUR-ORG.example/hr/*"
+
+# CHANGE ME: starter list for the clearest "should never be agent-callable
+# without a human in the loop" HR actions. Add your own tool names to match
+# whatever your HR agent's tool-calling runtime actually exposes (payroll
+# export, background-check lookups, and so on are common additions).
+deny_tool:
+  - export_employee_pii
+  - delete_employee_record
+
+# CHANGE ME: replace with the actual hostnames your HR agents' declared
+# tools are allowed to reach - your HRIS, your ATS, nothing else. Leave this
+# list narrow; add a domain only when a specific integration needs it.
+allow_domains:
+  - hris.YOUR-ORG.example
+  - YOUR-HR-SAAS-VENDOR.example
+
+# CHANGE ME: HR data warrants a verified workload identity behind every
+# agent that touches it.
+deny_if_unattested: true
