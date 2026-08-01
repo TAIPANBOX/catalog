@@ -30,8 +30,8 @@ to erode one convenience at a time.
 
 `templates-load.sh` needs the sibling repos checked out beside this one, and
 Go, Terraform and `python3`. It fails rather than skipping when one is absent:
-a skipped check reports silence as health. There is no CI in this repo, so
-these are local gates.
+a skipped check reports silence as health. The CI workflow checks the siblings
+out beside this repo and installs Go and Terraform for exactly that reason.
 
 ## Running the gates
 
@@ -39,10 +39,12 @@ these are local gates.
 git config core.hooksPath .githooks   # once, per clone
 ```
 
-There is no CI in this repository, so `.githooks/pre-push` is the ONLY thing
-that runs the gates above. Without that one line they are scripts nobody calls,
-which is a comment with an exit code. `git push --no-verify` skips them, and
-should be rare enough to be worth explaining.
+**Until 2026-08-01 the hook was the only caller, and that was a hole.**
+`core.hooksPath` is local configuration: it is not committed and does not travel
+with a clone, so these gates enforced nothing for anybody who cloned this repo.
+`.github/workflows/gates.yml` calls the same scripts, one copy each, and is what
+makes them travel. This repo is public, so standard runners cost nothing.
+`git push --no-verify` still skips the local half.
 
 ## Hard invariants
 

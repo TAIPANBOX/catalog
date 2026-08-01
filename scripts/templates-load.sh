@@ -31,7 +31,9 @@
 # failure this is here to prevent. If a sibling is missing, this FAILS rather
 # than skipping, because a skipped check reports silence as health.
 #
-# There is no CI in this repo, so this is a local gate.
+# TWO CALLERS, ONE COPY: .githooks/pre-push and .github/workflows/gates.yml.
+# The workflow checks wardryx, mockryx and agent-passport out beside this repo,
+# because the whole point is loading our templates with THEIR parsers.
 #
 # This file is the ONE copy of this check.
 
