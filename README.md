@@ -43,4 +43,4 @@ Every file in every directory is heavily commented in its own comment syntax, ex
 
 ---
 
-Part of the open TAIPANBOX agent-governance stack: TokenFuse (spend), Wardryx (policy), Engram (memory), Idryx (access), Qryx (crypto), Verdryx (quality), Mockryx (pre-prod), on the shared Agent Passport contract, configured via terraform-provider-taipan. The stack's home on the web is [**it-rat.com**](https://it-rat.com); the code lives at [**github.com/TAIPANBOX**](https://github.com/TAIPANBOX).
+Part of the open TAIPANBOX agent-governance stack: TokenFuse (spend), Wardryx (policy), Engram (memory), Idryx (access), Qryx (crypto), Verdryx (quality), Mockryx (pre-prod) and heraldyx (the mail out), on the shared Agent Passport contract, configured via terraform-provider-taipan and driven from Genaryx, the console over all of it. Trailryx, the record plane, is built and not wired into this yet. The stack's home on the web is [**it-rat.com**](https://it-rat.com); the code lives at [**github.com/TAIPANBOX**](https://github.com/TAIPANBOX).
