@@ -37,6 +37,31 @@ Every template here is defensive by design: it exists to help an operator govern
 
 Every file in every directory is heavily commented in its own comment syntax, explaining what to change and why, with realistic-but-clearly-placeholder values (`agent://YOUR-ORG.example/...`, `owner: team-x@YOUR-ORG.example`, and so on). **These are starting points to adapt, not finished policy** - read the comments, replace every placeholder, and test against your own infrastructure before relying on any of it.
 
+## How templates are validated
+
+This repo defines none of the formats it ships: Wardryx owns the policy shape, Mockryx the
+drill shape, agent-passport the passport schema, Terraform the module syntax. So
+[`scripts/templates-load.sh`](scripts/templates-load.sh) does not check templates against a
+schema written here - it loads each one **with its consumer's own code**: a freshly built
+`wardryx check` for policies and passports, a freshly built `mockryx run` for drills (pointed
+at a dead loopback port, so it parses and stops rather than reaching anywhere), the
+agent-passport repo's own JSON Schema for passports again, and `terraform fmt -check` for
+modules.
+
+That beats a schema this repo could write itself, because a schema written here would only
+ever encode our own reading of a format - the same reading that produced the template in the
+first place, so the two can never disagree. Consuming the real parser already caught a defect
+in a consumer instead of a template: a policy with a typo'd `deny_tools` (Wardryx's real field
+is `deny_tool`) loaded cleanly and reported "allowed", because Wardryx was decoding without
+strict field checking. A schema of our own would have agreed with the typo, since we would have
+had to write `deny_tools` into it too. Fixed in Wardryx; see CLAUDE.md's "Decisions that have no
+gate yet" for the full account.
+
+The one real cost: this needs the sibling repos (`wardryx`, `mockryx`, `agent-passport`) checked
+out beside this one, in CI and locally, so `.github/workflows/gates.yml` checks all three out
+before running the gate. Recommended practice for any new template type this catalog adds: load
+it with the code that already owns its format, not a new schema here.
+
 ## License
 
 [Apache-2.0](./LICENSE). Copyright 2026 IT-RAT.
