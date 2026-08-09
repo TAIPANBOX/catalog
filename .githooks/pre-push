@@ -31,6 +31,7 @@ step() {
 echo "pre-push gate"
 step "templates load with their consumer's parser" "./scripts/templates-load.sh"
 step "no executable ships" "./scripts/no-executables.sh"
+step "the gates above can still fail" "./scripts/gates-have-teeth.sh"
 
 echo
 if [ "$fail" -ne 0 ]; then

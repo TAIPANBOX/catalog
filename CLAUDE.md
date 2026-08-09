@@ -26,6 +26,7 @@ to erode one convenience at a time.
 ```sh
 ./scripts/templates-load.sh
 ./scripts/no-executables.sh
+./scripts/gates-have-teeth.sh   # invariant 5; needs a clean tree
 ```
 
 `templates-load.sh` needs the sibling repos checked out beside this one, and
@@ -67,6 +68,28 @@ true.
 4. **Nothing here denies by accident.** A preset that would break a working
    deployment on first apply is a bug, even if the rule it encodes is correct.
    Say what it blocks, in the file. *(not enforced)*
+
+5. **A check must be able to tell "did not fail" from "did not run", and both
+   gates here have been made to fail on purpose to prove they can.**
+   `templates-load.sh` already refuses in four distinct ways when it has
+   nothing to work with: no policy templates, no passport templates,
+   `jsonschema` absent, the sibling failing to build. Every one of those
+   sentences was true, was established by hand once in the session that wrote
+   it, and nothing re-ran them.
+
+   This repository is the one where that matters most, and the reason is what
+   it ships. These templates land in other people's estates. A gate that
+   quietly stops loading them breaks nothing here: it breaks in somebody else's
+   deployment, and the first symptom is a policy that governs nothing.
+   *(gate: `scripts/gates-have-teeth.sh`, 7 cases: four real faults, one
+   non-fault, and two subjects taken away entirely. The non-fault is the one
+   worth keeping: `scripts/` is exempt from the no-executables rule on purpose,
+   because those ARE executables, and a gate that flagged a new one would be
+   switched off by whoever added it.)*
+
+   **What it does not cover.** It cannot test itself. It proves each gate
+   catches the faults named in it, not every fault of that kind. It found no
+   hole in either.
 
 ## Decisions that have no gate yet
 
