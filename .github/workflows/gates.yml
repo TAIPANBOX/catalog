@@ -67,4 +67,5 @@ jobs:
       # clean tree and says so plainly, so it also reports any earlier step
       # that starts writing into the checkout.
       - name: the gates above can still fail
+        working-directory: catalog
         run: ./scripts/gates-have-teeth.sh
