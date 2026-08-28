@@ -46,9 +46,18 @@ jobs:
           repository: TAIPANBOX/agent-passport
           path: agent-passport
 
+      # This job BUILDS the siblings it checks out: templates-load.sh compiles
+      # wardryx and mockryx from source to load each template in the consumer
+      # that owns its syntax. So this version is not about this repository, it
+      # is about theirs, and it has to be at least what their `go.mod` asks for.
+      #
+      # setup-go v7 pins GOTOOLCHAIN=local, which is what makes that a hard
+      # requirement rather than a slow one: an older runner here would not
+      # quietly fetch the newer toolchain, it would fail, and the error would
+      # name a Go version rather than this line.
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26"
+          go-version: "1.27.0"
           cache: false
 
       - uses: hashicorp/setup-terraform@v3
