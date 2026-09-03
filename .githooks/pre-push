@@ -2,7 +2,9 @@
 #
 # Local gate before anything leaves this machine.
 #
-# This repository has no CI, so this hook is the ONLY thing that runs the gates.
+# .github/workflows/gates.yml runs these same gates in CI, on every push and
+# pull request. This hook runs them again locally, before anything leaves the
+# machine (pre-push), so a broken gate is caught before it even reaches GitHub.
 # A gate nothing calls is a comment with an exit code.
 #
 # Install (once):  git config core.hooksPath .githooks
