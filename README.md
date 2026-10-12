@@ -30,8 +30,8 @@ Every template here is defensive by design: it exists to help an operator govern
 
 | Directory | What it is | How you use it |
 |---|---|---|
-| [`wardryx-policies/`](wardryx-policies/) | Policy-as-code documents for [Wardryx](https://github.com/TAIPANBOX/wardryx), the stack's policy decision point | `wardryx serve -policy <dir>` |
-| [`mockryx-drills/`](mockryx-drills/) | Fire-drill scenarios for [Mockryx](https://github.com/TAIPANBOX/mockryx), the stack's pre-production guardrail rehearsal harness | `mockryx run --gateway <url> <dir>` |
+| [`wardryx-policies/`](wardryx-policies/) | Policy-as-code documents for [Wardryx](https://github.com/TAIPANBOX/wardryx), the stack's policy decision point: presets for finance, HR, support, customer-facing shop, data-pipeline and org-wide guardrails | `wardryx serve -policy <dir>` |
+| [`mockryx-drills/`](mockryx-drills/) | Fire-drill scenarios for [Mockryx](https://github.com/TAIPANBOX/mockryx), the stack's pre-production guardrail rehearsal harness: runaway budget, denied tool, leaked secret, and shop-assistant tool refusals | `mockryx run --gateway <url> <dir>` |
 | [`passport-templates/`](passport-templates/) | [Agent Passport](https://github.com/TAIPANBOX/agent-passport) identity documents for common agent runtimes (LangGraph, CrewAI, AutoGen) | copy, fill in, validate against the published schema |
 | [`terraform-modules/`](terraform-modules/) | Starting-point `.tf` files for [terraform-provider-taipan](https://github.com/TAIPANBOX/terraform-provider-taipan) | `terraform init` + `terraform plan` (published on the Registry as [`TAIPANBOX/taipan`](https://registry.terraform.io/providers/TAIPANBOX/taipan)) |
 
