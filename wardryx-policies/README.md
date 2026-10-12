@@ -1,6 +1,6 @@
 # Wardryx policy templates
 
-[Wardryx](https://github.com/TAIPANBOX/wardryx) is a policy decision point (PDP): given a proposed action from one of your own agents, it decides `allow`, `deny`, or `hold`. The files in this directory are starting-point policy documents for it, not a finished security posture - each one covers one common shape of guardrail (a finance desk, an HR team, a support bot, a data pipeline, an org-wide floor) with realistic-but-placeholder values you are expected to edit before you rely on them.
+[Wardryx](https://github.com/TAIPANBOX/wardryx) is a policy decision point (PDP): given a proposed action from one of your own agents, it decides `allow`, `deny`, or `hold`. The files in this directory are starting-point policy documents for it, not a finished security posture - each one covers one common shape of guardrail (a finance desk, an HR team, a support bot, a customer-facing shop assistant, a data pipeline, an org-wide floor) with realistic-but-placeholder values you are expected to edit before you rely on them.
 
 Every file mirrors the real `Policy` struct Wardryx loads (`internal/policy`): `name`, `target` (an `agent://` glob), `deny_tool`, `allow_domains`, `require_human_above_usd`, `deny_above_usd`, `max_steps`, and `deny_if_unattested`. A policy file may hold one document or a YAML/JSON list of several; `global-baseline.yaml` demonstrates the list form.
 
@@ -8,7 +8,7 @@ Every file mirrors the real `Policy` struct Wardryx loads (`internal/policy`): `
 
 1. Copy the templates you need into your own policy directory.
 2. Replace every `YOUR-ORG.example` trust domain and placeholder path segment with your real `agent://` naming.
-3. Tune the thresholds (`require_human_above_usd`, `deny_above_usd`, `max_steps`) and tool/domain lists to your own risk tolerance.
+3. Tune the thresholds (`require_human_above_usd`, `deny_above_usd`, `max_steps`) and tool/domain lists to your own risk tolerance. List every spelling a tool is exposed under in `deny_tool`: Wardryx matches a name with case and surrounding spaces folded (measured against Wardryx v1.2.0), but not a different spelling such as a hyphen in place of an underscore, so that spelling is allowed unless it is listed too.
 4. Point Wardryx at the directory:
 
    ```sh
