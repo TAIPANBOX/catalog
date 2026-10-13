@@ -1,0 +1,96 @@
+# support-shop-allow-list.yaml
+#
+# OPT-IN PRESET - not part of the base set. It REFUSES EVERY TOOL NOT LISTED in
+# allow_tool. Before you apply it, list the real tool names your shop agent uses,
+# or the agent loses every tool you did not name. Copy this file, edit the
+# placeholder values below, then load it into your own Wardryx instance:
+#
+#   wardryx serve -policy ./policies
+#
+# NEEDS WARDRYX v1.3.0 OR LATER
+# This file uses allow_tool, which Wardryx v1.2.0 does not know.
+# - Loaded from a file, v1.2.0 refuses to start: "field allow_tool not found in
+#   type policy.Policy". That is the loud failure to expect on a rollback.
+# - Pushed through PUT /v1/policies, v1.2.0 answers 200 but stores the policy
+#   WITHOUT the allow_tool list, and then allows the tools that list would have
+#   refused. Do not push this preset to a v1.2.0 deployment that way.
+# The measurements are in the MEASURED block below.
+#
+# WHAT THIS POLICY DOES
+# A customer-facing shop or support assistant talks to people who are not your
+# staff. For every agent whose id matches the target glob below, this preset does
+# two things:
+#
+#   allow_tool   permits one tool, lookup_order_status. It refuses every other tool
+#                name, including a refund, a cancellation or an address change,
+#                until you list that tool's exact name here.
+#   deny_tool    refuses three names outright, whatever else is listed:
+#                apply_staff_coupon   a discount code only employees may apply
+#                export_all_orders    a bulk export of every order
+#                shell_exec           a shell on the host
+#
+# deny_tool wins over allow_tool. An approval lifts neither refusal.
+#
+# It addresses the excessive-agency class in OWASP Top 10 for LLM Applications
+# 2025 (LLM06:2025): an agent holding more capability than its job needs.
+#
+# WHAT THIS POLICY DOES NOT COVER
+# - Any tool not named in allow_tool, which this preset refuses. The list is the
+#   whole permission set. Check it against your runtime before you apply it.
+# - Spend, steps and attestation. This preset sets no cost ceiling, no max_steps
+#   and no deny_if_unattested. Pair it with policies that set them.
+# - Who the customer is, and what an allowed tool returns. A lookup tool without
+#   its own access check can still show one customer another customer's order.
+#   That check belongs in the tool, not in this file.
+# - Tools the caller does not declare. Wardryx checks the tool names the caller
+#   sends with each request, and the name of any tool call it is asked about.
+# - Network destinations. allow_domains is not set, so egress is not restricted.
+# - Agent ids outside the target glob.
+# - Anything on its own. Wardryx only answers when an enforcement point (for
+#   example TokenFuse with Wardryx in enforce mode) sends it the request.
+#
+# NAME MATCHING
+# Names in allow_tool and deny_tool are matched with case and surrounding spaces
+# folded, and with nothing else. "Lookup_Order_Status " is allowed, because it
+# folds to the listed name. "lookup-order-status" (hyphen for underscore) is
+# refused, because it is not on the allow list, whatever deny_tool says.
+#
+# @decided 2026-10-13: a shop preset that refuses unlisted tools ships as an
+# opt-in file beside the base preset, not inside it.
+#
+# MEASURED
+# @measured `wardryx check <passport dir> <this file>` on a v1.3.0 build (origin/main b8d365e) 2026-10-13: exit 0, "3 passport(s) checked".
+# @measured the same check on a v1.2.0 build (tag v1.2.0, 50c3981) 2026-10-13: exit 1, "field allow_tool not found in type policy.Policy".
+# @measured `wardryx serve -policy <dir holding this file>` on v1.2.0 2026-10-13: refuses to start with the same error.
+# @measured `PUT /v1/policies/support-shop-allow-list` with this preset as JSON, on v1.2.0 2026-10-13: HTTP 200, the stored policy has no allow_tool, and /v1/decide then allows lookup-order-status, a hyphen name, an unlisted name and apply-staff-coupon.
+# @measured `/v1/decide` on v1.3.0 with this file loaded, by file and by PUT, 2026-10-13: lookup_order_status allowed; lookup-order-status, apply-staff-coupon and an unlisted name refused by allow_tool; apply_staff_coupon refused by deny_tool; "Lookup_Order_Status " allowed (folded).
+# @measured mockryx-drills/allow-list-drill.yaml against a stub enforcement point that asks that /v1/decide: with the base preset alone, one gap (the hyphen step got HTTP 200); with this preset and the base preset loaded together, all four shop drills pass. 2026-10-13.
+# Not measured: a live TokenFuse gateway in front of Wardryx, and the tool names of any real runtime.
+#
+# FIELD REFERENCE (see wardryx/internal/policy for the authoritative source)
+#   allow_tool  Tool names this policy permits for the agents it matches. Every
+#               other tool name is refused, and no approval lifts that refusal.
+#               Matched with case and surrounding spaces folded, like deny_tool.
+#   deny_tool   Tool names this policy refuses outright. Matched with case and
+#               surrounding spaces folded; see NAME MATCHING above.
+
+name: support-shop-allow-list
+
+# CHANGE ME: replace YOUR-ORG.example and "support-shop" with your real trust
+# domain and the path segment your shop assistant runs under.
+target: "agent://YOUR-ORG.example/support-shop/*"
+
+# CHANGE ME: these must be the exact names your tool-calling runtime exposes,
+# one entry per spelling you use. A tool missing from this list is refused.
+# lookup_order_status is the one tool this preset names as the shop's own; add
+# the exact names of any other tool your shop agent needs before you apply it.
+allow_tool:
+  - lookup_order_status
+
+# CHANGE ME: these must be the exact names your tool-calling runtime exposes,
+# one entry per spelling. Remove an entry only if that tool genuinely belongs in
+# a shop agent's hands.
+deny_tool:
+  - apply_staff_coupon
+  - export_all_orders
+  - shell_exec

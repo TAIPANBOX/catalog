@@ -9,7 +9,7 @@ These templates are adapted from the shapes Mockryx ships with, restructured as 
 ## How to use these
 
 1. Copy the drills you need into your own scenario directory.
-2. Replace every `YOUR-ORG.example` agent id and tune the thresholds to match your own environment and your own Wardryx/DLP/budget configuration. The shop drills (`staff-coupon-drill`, `bulk-export-drill`, `renamed-tool-drill`, `allow-list-drill`) mirror `wardryx-policies/support-shop-guardrail.yaml`: their agent id must sit under that policy's target path. The first three need their tool name in its `deny_tool` list. `allow-list-drill` needs its listed tool in `allow_tool`, which needs Wardryx v1.3.0 or later. Otherwise the drill tests nothing and reports a gap for the wrong reason.
+2. Replace every `YOUR-ORG.example` agent id and tune the thresholds to match your own environment and your own Wardryx/DLP/budget configuration. The shop drills (`staff-coupon-drill`, `bulk-export-drill`, `renamed-tool-drill`, `allow-list-drill`) mirror `wardryx-policies/support-shop-guardrail.yaml`: their agent id must sit under that policy's target path. The first three need their tool name in its `deny_tool` list. `allow-list-drill` rehearses the opt-in preset `wardryx-policies/support-shop-allow-list.yaml` instead, which is not in the base set: load that preset, after listing your real tool names in it, for the drill to test anything. That preset needs Wardryx v1.3.0 or later. Otherwise the drill tests nothing and reports a gap for the wrong reason.
 3. Point Mockryx at your OWN pre-production gateway, ideally one sitting in front of a fake or echo model provider, never a live one:
 
    ```sh

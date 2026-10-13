@@ -16,11 +16,18 @@
 # allow list that refused the legitimate tool would break the shop on the day
 # it is applied, which is the failure the template must not cause by accident.
 #
+# WHICH PRESET THIS REHEARSES
+# This drill rehearses the OPT-IN preset wardryx-policies/support-shop-allow-list.yaml,
+# which refuses every tool not listed in allow_tool. It does not rehearse the base
+# preset wardryx-policies/support-shop-guardrail.yaml, which has no allow_tool and
+# so lets the hyphen name through; that gap is what this drill reports on the base.
+#
 # BEFORE YOU RUN THIS
 # It only proves something if the Wardryx policy that matches the agent id below
-# has allow_tool: [lookup_order_status]. Use wardryx-policies/support-shop-guardrail.yaml,
-# with the same trust domain and path segment as the agent id here. The allow_tool
-# field needs Wardryx v1.3.0 or later; v1.2.0 refuses the file.
+# has allow_tool: [lookup_order_status]. Load wardryx-policies/support-shop-allow-list.yaml,
+# with the same trust domain and path segment as the agent id here, after you have
+# listed your real tool names in it. The allow_tool field needs Wardryx v1.3.0 or
+# later; v1.2.0 refuses the file at startup.
 #
 # WHAT THIS DRILL DOES NOT COVER
 # One listed tool and one respelling of it. A pass shows that this hyphen

@@ -6,6 +6,8 @@ Every file mirrors the real `Policy` struct Wardryx loads (`internal/policy`): `
 
 `allow_tool` needs Wardryx v1.3.0 or later. Wardryx v1.2.0 refuses a file that uses it at startup, which is the safe failure. Pushed through `PUT /v1/policies`, v1.2.0 stores the policy without the list and allows the tools it would have refused, so do not send such a policy to a v1.2.0 deployment that way.
 
+Only `support-shop-allow-list.yaml` uses `allow_tool`, and it is opt-in: it refuses every tool its list does not name, so list your real tool names before you load it. The other files in this directory are the base set and do not refuse unlisted tools.
+
 ## How to use these
 
 1. Copy the templates you need into your own policy directory.

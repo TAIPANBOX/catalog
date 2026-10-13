@@ -4,81 +4,45 @@
 # placeholder values below, then load it into your own Wardryx instance:
 #
 #   wardryx serve -policy ./policies
-#
-# NEEDS WARDRYX v1.3.0 OR LATER
-# This file uses allow_tool, which Wardryx v1.2.0 does not know. Loaded from a
-# file, v1.2.0 refuses the whole file at startup ("field allow_tool not found"),
-# which is the loud failure to expect on a rollback. Pushed through
-# PUT /v1/policies, v1.2.0 answers 200, stores the policy WITHOUT the allow_tool
-# list, and then allows the tools that list would have refused. Do not push this
-# policy to a v1.2.0 deployment that way. The measurements are in the MEASURED
-# block below.
+# To refuse every tool the shop agent does not name, use the opt-in preset support-shop-allow-list.yaml (Wardryx v1.3.0 or later).
 #
 # WHAT THIS POLICY DOES
 # A customer-facing shop or support assistant talks to people who are not your
 # staff, so it should never hold a tool meant only for staff, or a tool that
-# reads the whole order book in one call. For every agent whose id matches the
-# target glob below, this template does two things:
+# reads the whole order book in one call. This template denies three tool names
+# outright, for every agent whose id matches the target glob below:
 #
-#   allow_tool   permits one tool, lookup_order_status. Every other tool name is
-#                refused, including a refund, a cancellation or an address change,
-#                until you list its exact name. @decided 2026-10-13: the shop
-#                agent may use only the tools its allow list names, and any other
-#                tool is refused.
-#   deny_tool    refuses three names outright, whatever else is listed:
-#                apply_staff_coupon   a discount code only employees may apply
-#                export_all_orders    a bulk export of every order
-#                shell_exec           a shell on the host
-#
-# deny_tool wins over allow_tool. An approval lifts neither refusal.
+#   apply_staff_coupon   a discount code only employees may apply
+#   export_all_orders    a bulk export of every order
+#   shell_exec           a shell on the host
 #
 # It addresses the excessive-agency class in OWASP Top 10 for LLM Applications
 # 2025 (LLM06:2025): an agent holding more capability than its job needs.
 #
 # WHAT THIS POLICY DOES NOT COVER
-# - Any tool not named in allow_tool. The list is the whole permission set: if
-#   your shop needs a tool and you did not list its name, the agent loses it on
-#   the day you apply this file. Check the list against your runtime first.
+# - Any tool not named in deny_tool. A refund, a cancellation, an address change
+#   or a price override is allowed by this file until you add it yourself.
 # - Spend, steps and attestation. This file sets no cost ceiling, no max_steps
 #   and no deny_if_unattested. Pair it with policies that set them.
 # - Who the customer is, and what an allowed tool returns. A lookup tool without
 #   its own access check can still show one customer another customer's order.
 #   That check belongs in the tool, not in this file.
 # - Tools the caller does not declare. Wardryx checks the tool names the caller
-#   sends with each request, and the name of any tool call it is asked about, so
-#   a tool the runtime can run without declaring it is not checked.
+#   sends with each request, so a tool the runtime can run without declaring it
+#   is not checked.
 # - Network destinations. allow_domains is not set, so egress is not restricted.
 # - Agent ids outside the target glob.
 # - Anything on its own. Wardryx only answers when an enforcement point (for
 #   example TokenFuse with Wardryx in enforce mode) sends it the request.
 #
-# NAME MATCHING
-# Names in allow_tool and deny_tool are matched with case and surrounding spaces
-# folded, and with nothing else. So "Lookup_Order_Status " (capitals, trailing
-# space) is allowed, because it folds to the listed name, while
-# "lookup-order-status" (hyphen for underscore) is refused, because it is not on
-# the allow list. Because the allow list refuses every name it does not hold, a
-# respelled tool is refused without a deny_tool entry of its own.
-#
-# Before allow_tool, deny_tool alone had to list every spelling: "Apply_Staff_Coupon "
-# was denied (capitals and a trailing space), but "apply-staff-coupon" was allowed.
-# MEASURED 2026-10-12 against Wardryx v1.2.0 for that deny_tool behaviour
-# (mockryx-drills/renamed-tool-drill.yaml). With this file's allow_tool, the
-# hyphen spelling of a denied name is refused too; see the MEASURED block.
-#
-# MEASURED
-# @measured `wardryx check <passport dir> <this file>` on a v1.3.0 build (origin/main b8d365e) 2026-10-13: exit 0, "3 passport(s) checked".
-# @measured the same check on a v1.2.0 build (tag v1.2.0, 50c3981) 2026-10-13: exit 1, "field allow_tool not found in type policy.Policy".
-# @measured `wardryx serve -policy <dir holding this file>` on v1.2.0 2026-10-13: refuses to start with the same error.
-# @measured `PUT /v1/policies/support-shop-guardrail` with this policy as JSON, on v1.2.0 2026-10-13: HTTP 200, the stored policy has no allow_tool, and /v1/decide then allows lookup-order-status, a hyphen name, an unlisted name and apply-staff-coupon.
-# @measured `/v1/decide` on v1.3.0 with this file loaded, by file and by PUT, 2026-10-13: lookup_order_status allowed; lookup-order-status, apply-staff-coupon and an unlisted name refused by allow_tool; apply_staff_coupon refused by deny_tool; "Lookup_Order_Status " allowed (folded).
-# @measured mockryx-drills/allow-list-drill.yaml, with the other three shop drills, against a stub enforcement point that asks that /v1/decide: on the policy without allow_tool, one gap (the hyphen step got HTTP 200); with this file, all four pass. 2026-10-13.
-# Not measured: a live TokenFuse gateway in front of Wardryx, and the tool names of any real runtime.
+# NAME MATCHING, MEASURED 2026-10-12 against Wardryx v1.2.0
+# A deny_tool name is matched with case and surrounding spaces folded, so
+# "Apply_Staff_Coupon " (capitals, trailing space) is still denied
+# (mockryx-drills/renamed-tool-drill.yaml). A tool exposed under another
+# spelling is not matched: "apply-staff-coupon" with a hyphen is allowed.
+# List every name each tool is exposed under, one entry per spelling you use.
 #
 # FIELD REFERENCE (see wardryx/internal/policy for the authoritative source)
-#   allow_tool  Tool names this policy permits for the agents it matches. Every
-#               other tool name is refused, and no approval lifts that refusal.
-#               Matched with case and surrounding spaces folded, like deny_tool.
 #   deny_tool   Tool names this policy refuses outright. Matched with case and
 #               surrounding spaces folded; see NAME MATCHING above.
 
@@ -89,15 +53,8 @@ name: support-shop-guardrail
 target: "agent://YOUR-ORG.example/support-shop/*"
 
 # CHANGE ME: these must be the exact names your tool-calling runtime exposes,
-# one entry per spelling you use. A tool missing from this list is refused.
-# lookup_order_status is the one tool this template names as the shop's own;
-# add the exact names of any other tool your shop agent needs.
-allow_tool:
-  - lookup_order_status
-
-# CHANGE ME: these must be the exact names your tool-calling runtime exposes,
-# one entry per spelling. Remove an entry only if that tool genuinely belongs in
-# a shop agent's hands.
+# one entry per spelling. A tool missing from this list is not denied. Remove
+# an entry only if that tool genuinely belongs in a shop agent's hands.
 deny_tool:
   - apply_staff_coupon
   - export_all_orders
