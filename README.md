@@ -30,8 +30,8 @@ Every template here is defensive by design: it exists to help an operator govern
 
 | Directory | What it is | How you use it |
 |---|---|---|
-| [`wardryx-policies/`](wardryx-policies/) | Policy-as-code documents for [Wardryx](https://github.com/TAIPANBOX/wardryx), the stack's policy decision point: presets for finance, HR, support, customer-facing shop, data-pipeline and org-wide guardrails | `wardryx serve -policy <dir>` |
-| [`mockryx-drills/`](mockryx-drills/) | Fire-drill scenarios for [Mockryx](https://github.com/TAIPANBOX/mockryx), the stack's pre-production guardrail rehearsal harness: runaway budget, denied tool, leaked secret, and shop-assistant tool refusals | `mockryx run --gateway <url> <dir>` |
+| [`wardryx-policies/`](wardryx-policies/) | Policy-as-code documents for [Wardryx](https://github.com/TAIPANBOX/wardryx), the stack's policy decision point: presets for finance, HR, support, customer-facing shop (`support-shop-guardrail`, and the opt-in `support-shop-allow-list`, which refuses every tool not listed in `allow_tool`), data-pipeline and org-wide guardrails | `wardryx serve -policy <dir>` |
+| [`mockryx-drills/`](mockryx-drills/) | Fire-drill scenarios for [Mockryx](https://github.com/TAIPANBOX/mockryx), the stack's pre-production guardrail rehearsal harness: runaway budget, denied tool, leaked secret, shop-assistant tool refusals, a respelled tool (`renamed-tool-drill`) and an allow list (`allow-list-drill`) | `mockryx run --gateway <url> <dir>` |
 | [`passport-templates/`](passport-templates/) | [Agent Passport](https://github.com/TAIPANBOX/agent-passport) identity documents for common agent runtimes (LangGraph, CrewAI, AutoGen) | copy, fill in, validate against the published schema |
 | [`terraform-modules/`](terraform-modules/) | Starting-point `.tf` files for [terraform-provider-taipan](https://github.com/TAIPANBOX/terraform-provider-taipan) | `terraform init` + `terraform plan` (published on the Registry as [`TAIPANBOX/taipan`](https://registry.terraform.io/providers/TAIPANBOX/taipan)) |
 
@@ -68,4 +68,4 @@ it with the code that already owns its format, not a new schema here.
 
 ---
 
-Part of the open TAIPANBOX agent-governance stack: TokenFuse (spend), Wardryx (policy), Engram (memory), Idryx (access), Qryx (crypto), Verdryx (quality), Mockryx (pre-prod), heraldyx (the mail out) and scopyx (governed web egress), on the shared Agent Passport contract, configured via terraform-provider-taipan and driven from Genaryx, the console over all of it. Trailryx, the record plane, is built and not wired into this yet. The stack's home on the web is [**it-rat.com**](https://it-rat.com); the code lives at [**github.com/TAIPANBOX**](https://github.com/TAIPANBOX).
+Part of the open TAIPANBOX agent-governance stack: TokenFuse (spend), Wardryx (policy), Engram (memory), Idryx (access), Qryx (crypto), Verdryx (quality), Mockryx (pre-prod), heraldyx (the mail out) and scopyx (governed web egress), on the shared Agent Passport contract, configured via terraform-provider-taipan and driven from Genaryx, the console over all of it. Trailryx, the record plane, has no template in this catalog yet. The stack's home on the web is [**it-rat.com**](https://it-rat.com); the code lives at [**github.com/TAIPANBOX**](https://github.com/TAIPANBOX).
