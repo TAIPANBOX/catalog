@@ -1,6 +1,6 @@
 # Mockryx drill templates
 
-[Mockryx](https://github.com/TAIPANBOX/mockryx) is a pre-production fire-drill harness: it sends crafted requests through a gateway you operate and checks that your guardrails respond the way you expect, before a real agent (or a prompt-injected one) ever gets the chance to. The files in this directory are starting-point scenarios, not a finished test suite - each one rehearses one guardrail failure mode (a runaway budget, a denied tool call, a leaked-looking secret, a staff-only coupon or a bulk export offered to a shop assistant, a denied tool under a respelled name) with placeholder identities and thresholds you are expected to edit.
+[Mockryx](https://github.com/TAIPANBOX/mockryx) is a pre-production fire-drill harness: it sends crafted requests through a gateway you operate and checks that your guardrails respond the way you expect, before a real agent (or a prompt-injected one) ever gets the chance to. The files in this directory are starting-point scenarios, not a finished test suite - each one rehearses one guardrail failure mode (a runaway budget, a denied tool call, a leaked-looking secret, a staff-only coupon or a bulk export offered to a shop assistant, a denied tool under a respelled name, a listed tool offered under a respelled name that an allow list must refuse) with placeholder identities and thresholds you are expected to edit.
 
 Every file mirrors the real scenario schema Mockryx loads (`internal/scenario`): a `name`, optional `description` and `requires` (the optional gateway feature the drill depends on, e.g. `wardryx` or `dlp`), and one or more `steps`, each with a `request` (model, messages, optional tools), optional `headers` (`run_id`, `agent_id`, `budget_usd`, `on_behalf_of`, and so on), and a required `expect` (the HTTP status, and optionally response headers, a repeat deadline, or an async event).
 
@@ -9,7 +9,7 @@ These templates are adapted from the shapes Mockryx ships with, restructured as 
 ## How to use these
 
 1. Copy the drills you need into your own scenario directory.
-2. Replace every `YOUR-ORG.example` agent id and tune the thresholds to match your own environment and your own Wardryx/DLP/budget configuration. The shop drills (`staff-coupon-drill`, `bulk-export-drill`, `renamed-tool-drill`) mirror `wardryx-policies/support-shop-guardrail.yaml`: their agent id must sit under that policy's target path and their tool name must be in its `deny_tool` list, or the drill tests nothing and reports a gap for the wrong reason.
+2. Replace every `YOUR-ORG.example` agent id and tune the thresholds to match your own environment and your own Wardryx/DLP/budget configuration. The shop drills (`staff-coupon-drill`, `bulk-export-drill`, `renamed-tool-drill`, `allow-list-drill`) mirror `wardryx-policies/support-shop-guardrail.yaml`: their agent id must sit under that policy's target path. The first three need their tool name in its `deny_tool` list. `allow-list-drill` needs its listed tool in `allow_tool`, which needs Wardryx v1.3.0 or later. Otherwise the drill tests nothing and reports a gap for the wrong reason.
 3. Point Mockryx at your OWN pre-production gateway, ideally one sitting in front of a fake or echo model provider, never a live one:
 
    ```sh

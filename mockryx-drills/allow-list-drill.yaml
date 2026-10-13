@@ -1,0 +1,93 @@
+# allow-list-drill.yaml
+#
+# TEMPLATE - starting point, not a finished drill. Copy this file, edit the
+# placeholder values below, then run it against a gateway YOU operate:
+#
+#   mockryx run --gateway http://127.0.0.1:8080 ./drills
+#
+# DEFENSIVE INTENT
+# This scenario is a fire drill, not an attack. A customer-facing shop agent is
+# allowed exactly one tool, lookup_order_status. The same tool then arrives
+# under a respelled name with a hyphen in place of the underscore. The hyphen
+# name is in no deny list, so a deny-only policy lets it through. An allow list
+# refuses it, because the name is not on the list. mockryx never runs the tool.
+#
+# Step one checks the other side: the listed tool must still be allowed. An
+# allow list that refused the legitimate tool would break the shop on the day
+# it is applied, which is the failure the template must not cause by accident.
+#
+# BEFORE YOU RUN THIS
+# It only proves something if the Wardryx policy that matches the agent id below
+# has allow_tool: [lookup_order_status]. Use wardryx-policies/support-shop-guardrail.yaml,
+# with the same trust domain and path segment as the agent id here. The allow_tool
+# field needs Wardryx v1.3.0 or later; v1.2.0 refuses the file.
+#
+# WHAT THIS DRILL DOES NOT COVER
+# One listed tool and one respelling of it. A pass shows that this hyphen
+# spelling is refused for this agent id. It does not show that every other
+# unlisted name is refused, and it does not show that the listed tool works in
+# your own runtime under its real name: change the name in step one to the one
+# your runtime exposes. Case and surrounding spaces are folded by allow_tool,
+# so a capitalised spelling of the listed name is allowed; that is not tested here.
+#
+# WHY THIS ONE DECLARES "requires: wardryx"
+# The policy engine is an optional gateway feature. If the gateway under test
+# never once stamps an x-fuse-wardryx response header, mockryx reports
+# "guardrail not configured" instead of a false failure.
+
+name: allow-list-drill
+requires: wardryx
+description: >
+  A shop agent may use lookup_order_status and no other tool. Step one offers
+  that listed tool and expects it allowed (HTTP 200). Step two offers the same
+  tool with a hyphen in place of the underscore and expects Wardryx to refuse
+  it: HTTP 403 with x-fuse-wardryx: deny.
+
+steps:
+  - name: offer-the-listed-order-status-tool
+    request:
+      model: claude-haiku
+      max_tokens: 50
+      messages:
+        - role: user
+          content: "Where is my order 1001?"
+      tools:
+        # CHANGE ME: the listed tool, spelled exactly as your runtime exposes it.
+        # It must match an entry in your own policy's allow_tool list.
+        - name: lookup_order_status
+          description: "Look up the status of one order by its number."
+    headers:
+      run_id: mockryx-allow-list-drill
+      # CHANGE ME: an agent id under the trust domain and path your own shop
+      # policy targets (agent://YOUR-ORG.example/support-shop/*).
+      agent_id: "agent://YOUR-ORG.example/support-shop/rehearsal-checkout-bot"
+      on_behalf_of: "user://YOUR-ORG.example/rehearsal-operator"
+      budget_usd: "1.00"
+      task_type: support_chat
+    expect:
+      status: 200
+
+  - name: offer-the-hyphen-respelling-of-the-listed-tool
+    request:
+      model: claude-haiku
+      max_tokens: 50
+      messages:
+        - role: user
+          content: "Where is my order 1001?"
+      tools:
+        # The listed name with a hyphen for the underscore. It is not on the
+        # allow list, so it must be refused. Keep it a respelling of the listed
+        # name, because that is what this drill tests.
+        - name: "lookup-order-status"
+          description: "Look up the status of one order by its number."
+    headers:
+      run_id: mockryx-allow-list-drill
+      # CHANGE ME: the same agent id as step one.
+      agent_id: "agent://YOUR-ORG.example/support-shop/rehearsal-checkout-bot"
+      on_behalf_of: "user://YOUR-ORG.example/rehearsal-operator"
+      budget_usd: "1.00"
+      task_type: support_chat
+    expect:
+      status: 403
+      header:
+        x-fuse-wardryx: deny
