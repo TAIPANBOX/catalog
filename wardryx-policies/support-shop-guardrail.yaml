@@ -4,6 +4,7 @@
 # placeholder values below, then load it into your own Wardryx instance:
 #
 #   wardryx serve -policy ./policies
+# To refuse every tool the shop agent does not name, use the opt-in preset support-shop-allow-list.yaml (Wardryx v1.3.0 or later).
 #
 # WHAT THIS POLICY DOES
 # A customer-facing shop or support assistant talks to people who are not your
