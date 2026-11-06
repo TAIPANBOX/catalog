@@ -33,6 +33,7 @@ step() {
 echo "pre-push gate"
 step "templates load with their consumer's parser" "./scripts/templates-load.sh"
 step "no executable ships" "./scripts/no-executables.sh"
+step "no pipe ends in a grep that leaves early" "./scripts/no-reader-leaves-a-pipe-early.sh"
 step "the gates above can still fail" "./scripts/gates-have-teeth.sh"
 
 echo

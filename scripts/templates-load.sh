@@ -77,7 +77,7 @@ if need_repo wardryx; then
 		done
 		# wardryx check reports malformed passports on stderr rather than failing,
 		# so the count is read rather than assumed.
-		if "$WORK/wardryx" check "$ROOT/passport-templates" "${policies[0]}" 2>&1 | grep -q 'malformed'; then
+		if grep -q 'malformed' <<<"$("$WORK/wardryx" check "$ROOT/passport-templates" "${policies[0]}" 2>&1)"; then
 			note "wardryx reported malformed passport templates"
 		fi
 	fi

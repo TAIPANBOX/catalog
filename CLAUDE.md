@@ -26,6 +26,7 @@ to erode one convenience at a time.
 ```sh
 ./scripts/templates-load.sh
 ./scripts/no-executables.sh
+./scripts/no-reader-leaves-a-pipe-early.sh  # invariant 6
 ./scripts/gates-have-teeth.sh   # invariant 5; needs a clean tree
 ```
 
@@ -90,6 +91,8 @@ true.
    **What it does not cover.** It cannot test itself. It proves each gate
    catches the faults named in it, not every fault of that kind. It found no
    hole in either.
+6. **A check says what the text holds, not which of a writer and its reader finished first.** `@claude 2026-11-06`, carried from stack-k8s#226 and stack-single#167; it records no decision of the owner. Under `set -o pipefail` a pipe into `grep -q` reports the writer too: grep leaves at its first match, a writer with more to write takes SIGPIPE, the pipeline returns 141, and a line that is there reads as missing. In the negative form, `if ... | grep -q bad`, the 141 reads as clean and a refused line passes. The rate follows the load on the machine. @measured forge, 4 cores, bash 5.2.37, GNU grep 3.11, 2026-11-06, `gate-loop.sh` beside six busy loops (estate-gates `evidence/pipe-readers-2026-11-06/`): `scripts/no-executables.sh` at `4b2a242` failed 0 of 100 runs, and 0 of 100 once fixed: it reads two bytes of a file, one write, and stays in a pipe into `grep -c` because those bytes can be binary. Every such pipe in live shell code here moved, 3 in 3 files: to a here-string, `grep -q x <<<"$text"`, or to a pipe into `grep -c x >/dev/null`.
+    *(gate: `scripts/no-reader-leaves-a-pipe-early.sh`: a control that breaks a real pipe, known lines through the reader, then every tracked shell file and workflow `run:` step masked down to live code. It refuses to report OK on no shell file, no pipe, no step or a file it lost its place in. Eighteen cases in `scripts/gates-have-teeth.sh`. Not held: `| head`, the same race, which here takes a few lines from a writer of a few lines.)*
 
 ## Decisions that have no gate yet
 
