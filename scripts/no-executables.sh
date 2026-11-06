@@ -33,7 +33,7 @@ while IFS= read -r f; do
 		echo "FAIL: $f is executable"
 		problems=$((problems + 1))
 	fi
-	if head -c 2 "$f" 2>/dev/null | grep -q '#!'; then
+	if head -c 2 "$f" 2>/dev/null | grep -c '#!' >/dev/null; then
 		echo "FAIL: $f carries a shebang"
 		problems=$((problems + 1))
 	fi
