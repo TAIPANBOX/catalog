@@ -45,7 +45,9 @@ git config core.hooksPath .githooks   # once, per clone
 `core.hooksPath` is local configuration: it is not committed and does not travel
 with a clone, so these gates enforced nothing for anybody who cloned this repo.
 `.github/workflows/gates.yml` calls the same scripts, one copy each, and is what
-makes them travel. This repo is public, so standard runners cost nothing.
+makes them travel. It also runs every Monday, because the parsers it loads the
+templates with change in their own repositories without a push here. This repo
+is public, so standard runners cost nothing.
 `git push --no-verify` still skips the local half.
 
 ## Hard invariants
