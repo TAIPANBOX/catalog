@@ -16,12 +16,25 @@
 # so none of these is optional here.
 #
 # All four repos are public, so standard runners cost nothing.
+#
+# WEEKLY, TOO. This repository has no dependency manifest of its own: no
+# go.mod, Cargo.lock or requirements file for govulncheck, cargo audit or
+# pip-audit to read, so a vulnerability scan here would measure nothing. What
+# it does depend on is the parsers of the projects that consume its templates,
+# and those change without any push here. The Monday run builds wardryx and
+# mockryx from their current main, reads agent-passport's schema from its main,
+# parses the modules with Terraform and loads every template again, so a
+# template a consumer stopped accepting is found within a week. wardryx and
+# mockryx run their own weekly vulnerability scans.
 name: gates
 
 on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "55 5 * * 1"
+  workflow_dispatch:
 
 permissions:
   contents: read
